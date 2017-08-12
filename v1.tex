@@ -1,0 +1,45 @@
+\documentstyle[rfc]{article}
+%\rfc          - used when generating RFC instead of I-D
+\rfcnum{98329138}
+\i-d
+\title{Authentication service over TCP}
+\author{Arthur Poulet}
+\address{University of Kent}
+\pubdate{August, 2017}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+	stuff
+\end{abstract}
+
+\newpage
+\tableofcontents
+
+\newpage
+\section{Introduction}
+\paragraph{}
+In lots of projects it is required to have a authentication system, in order to authorize users to do some actions, and identify them for logging purposes. This is a critical security issue because an error in it cost money, trust, and privacy. Furthermore, it is very interesting for some parties to have a centralized authentication system shared for several services.
+\paragraph{}
+The goal of the Auth service is to provide a clear, secure, and simple authentication interface and authorization manager. It is a TCP server that SHOULD provide a SSL connection, on which an user must be able to authenticate, and request access to a resource.
+\paragraph{}
+The Auth service does not intend to replace security check on the services that use it. It is an annular similar to the LDAP services, but using a much simpler query language.
+
+\newpage
+\section{Terminology}
+\begin{description}
+	\item[client]
+	\item[server]
+	\item[auth-api]
+	\item[secured client]
+	\item[command]
+	\item[response]
+\end{description}
+
+\newpage
+\section{Protocol Overview}
+\paragraph{}
+
+\end{document}
