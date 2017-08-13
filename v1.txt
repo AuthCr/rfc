@@ -75,9 +75,9 @@ Internet-Draft                     I-D                       August 2017
 
    o  secure server: A server using SSL.
 
-   o  command: Query sent to the server by the client.
+   o  query: Messages sent to the server by the client.
 
-   o  response: Message returned after a query from the server to the
+   o  reply: Messages returned after a query from the server to the
       client.
 
 1.2.  Goals
@@ -122,9 +122,9 @@ Internet-Draft                     I-D                       August 2017
 
 2.  Protocol Overview
 
-2.1.  Syntax of the commands
+2.1.  Syntax of the queries
 
-   Commands MUST follow the grammar defined bellow:
+   Queries MUST follow the grammar defined bellow:
 
 SEP          = ":"
 WORD_FIRST   = <any alphanumeric ASCII character>
@@ -135,31 +135,31 @@ ANY_STR      = ANY ANY *
 SPACE        = <ASCII SP, space>
 
 PARAMETERS   = ( WORD SPACE ) * ( ANY_STR ) ?
-CMD_WORDS    = WORD SPACE ( WORD SPACE ) *
-CMD          = CMD_WORDS ( SEP PARAMETERS ) ?
+QUERY_WORDS  = WORD SPACE ( WORD SPACE ) *
+QUERY        = QUERY_WORDS ( SEP PARAMETERS ) ?
 
-JSON         = <Json object, defined in {{RFC7159}}> / "\"" ANY_STR "\""
+JSON         = <Json object, defined in RFC7159> / "\"" ANY_STR "\""
 SUCCESS      = "success"
 FAILURE      = "failure"
 SUCCESS_DATA = ( SPACE JSON ) ?
 FAILURE_DATA = ( SPACE ANY * ) ?
-RESPONSE     = ( SUCCESS SUCCESS_DATA / FAILURE FAILURE_DATA )
+REPLY        = ( SUCCESS SUCCESS_DATA / FAILURE FAILURE_DATA )
 
 2.1.1.  Special characters
 
    There are some special characters that MUST have a special behaviour
    in the server:
 
-   o  "*": it MUST match with "any string".  It is for the command "USER
+   o  "\*": it MUST match with "any string".  It is for the query "USER
       HAS ACCESS TO" and "USER GET PERM".  Example: if a path "/public*"
       is defined, "USER HAS ACCESS TO : user /public/any" must matches.
 
    o  "$": it MUST match with "any word", with the same behaviour than
-      "*"
+      "\*"
 
    o  "~": it MUST be replaced with the username of the current
-      authenticated user when matching commands.  Example: "/public/~/*"
-      for the user "root" is equal to "/public/root/*".
+      authenticated user when matching queries.  Example: "/public/~/\*"
+      for the user "root" is equal to "/public/root/\*".
 
 
 
@@ -171,38 +171,38 @@ Internet-Draft                     I-D                       August 2017
 
 
    o  "\a": it SHOULD be replaced with the username of the current
-      authenticated user when writing the command.
+      authenticated user when writing the query.
 
-2.2.  Types of commands
+2.2.  Types of queries
 
-   There are 3 mains types of command: AUTH, USER, GROUP.  They begin
-   with the associated word.  Other commands MAY be added to extend the
+   There are 3 mains types of query: AUTH, USER, GROUP.  They begin with
+   the associated word.  Other queries MAY be added to extend the
    language but they MUST NOT begin with AUTH, USER, or GROUP.
 
-2.3.  Response data
+2.3.  Reply data
 
 2.3.1.  Failures
 
-   If the command fails, a string that describes the problem MAY also be
+   If the query fails, a string that describes the problem MAY also be
    added.  There is 3 reasons of failures:
 
-   1.  The client is not connected (no AUTH command has been successful)
+   1.  The client is not connected (no AUTH query has been successful)
 
-   2.  The command contains an error (missing : for example)
+   2.  The query contains an error (missing : for example)
 
-   3.  The command returns a boolean "success" or "failure"
+   3.  The query returns a boolean "success" or "failure"
 
 2.3.2.  Success
 
-   If the command returns a success, it is sometimes followed by a Json
+   If the query returns a success, it is sometimes followed by a Json
    object, for the read operations (such as USER LIST, etc.).
 
-2.4.  Commands descriptions
+2.4.  Queries descriptions
 
-   In the responses, we only handle success data and boolean responses.
-   Failure MAY occurs in any response for the same reasons.
+   In the replies, we only handle success data and boolean replies.
+   Failure MAY occurs in any reply for the same reasons.
 
-   There are 3 responses possible:
+   There are 3 replies possible:
 
    1.  Boolean: either "success" or "failure".  A failure MAY not be an
        error of syntax or connection.
@@ -210,14 +210,14 @@ Internet-Draft                     I-D                       August 2017
    2.  None: "success" or "failure".  A failure MUST be an error of
        syntax or connection.
 
-   3.  Specified: other responses MAY be a failure (like None) but the
-       "success" response is followed by more data.
+   3.  Specified: other replies MAY be a failure (like None) but the
+       "success" reply is followed by more data.
 
 2.4.1.  AUTH
 
-   Command: AUTH
+   Query: "AUTH"
 
-   Parameters: <username> <password>
+   Parameters: "<username> <password>"
 
 
 
@@ -226,53 +226,53 @@ Poulet                  Expires February 12, 2018               [Page 4]
 Internet-Draft                     I-D                       August 2017
 
 
-   Responses: Boolean
+   Replies: Boolean
 
-   Example: AUTH : root toor
+   Example: "AUTH : root toor"
 
 2.4.2.  USER HAS ACCESS TO
 
-   Command: USER HAS ACCESS TO
+   Query: USER HAS ACCESS TO
 
-   Parameters: <username> <perm> <resource>
+   Parameters: "<username> <perm> <resource>"
 
-   Responses: Boolean
+   Replies: Boolean
 
-   Example: USER HAS ACCESS TO : root write https://url/some/path
+   Example: "USER HAS ACCESS TO : root write https://url/some/path"
 
 2.4.3.  GROUP ADD
 
-   Command: GROUP ADD
+   Query: "GROUP ADD"
 
-   Parameters: <group> <perm> <resource>
+   Parameters: "<group> <perm> <resource>"
 
-   Responses: None
+   Replies: None
 
-   Example: GROUP ADD : guest read /public*
+   Example: "GROUP ADD : guest read /public*"
 
 2.4.4.  GROUP REMOVE
 
-   Command: GROUP REMOVE
+   Query: "GROUP REMOVE"
 
-   Parameters: <group>
+   Parameters: "<group>"
 
-   Responses: None
+   Replies: None
 
-   Example: GROUP REMOVE : guest
+   Example: "GROUP REMOVE : guest"
 
 2.4.5.  GROUP LIST
 
-   Command: GROUP LIST
+   Query: "GROUP LIST"
 
-   Responses: an array of groups, quoted
+   Replies: an array of groups, quoted "success ["root", "admin"]"
 
-   success ["root", "admin"]
+   Example: `GROUP LIST
 
-   Example: GROUP LIST
+2.4.6.  GROUP LIST PERMS
 
+   Query: "GROUP LIST PERMS"
 
-
-
+   Parameters: "<group>"
 
 
 
@@ -282,51 +282,51 @@ Poulet                  Expires February 12, 2018               [Page 5]
 Internet-Draft                     I-D                       August 2017
 
 
-2.4.6.  GROUP LIST PERMS
+   Replies: an associated array of resources and rights "success
+   {"/private" => "write", "/public" => "read"}"
 
-   Command: GROUP LIST PERMS
-
-   Parameters: <group>
-
-   Responses: an associated array of resources and rights
-
-   success {"/private" => "write", "/public" => "read"}
-
-   Example: GROUP LIST PERMS : guest
+   Example: "GROUP LIST PERMS : guest"
 
 2.4.7.  GROUP GET PERM
 
-   Command: GROUP GET PERM
+   Query: GROUP GET PERM
 
-   Parameters: <group> <resource>
+   Parameters: "<group> <resource>"
 
-   Response: a right (permission value) quoted
+   Reply: a right (permission value) quoted "success "write""
 
-   success "write"
+   Example: "GROUP GET PERM : guest /public/some"
 
-   Example: GROUP GET PERM : guest /public/some
-
-   Example: GROUP GET PERM : guest /private/some
+   Example: "GROUP GET PERM : guest /private/some"
 
 2.4.8.  USER LIST
 
-   Command: USER LIST
+   Query: USER LIST
 
-   Responses: an array of users, quoted
+   Replies: an array of users, quoted "success ["root", "guest"]"
 
-   success ["root", "guest"]
-
-   Example: USER LIST
+   Example: "USER LIST"
 
 2.4.9.  USER ADD
 
-   Command: USER ADD
+   Query: USER ADD
 
-   Parameters: <username> <password>
+   Parameters: "<username> <password>"
 
-   Responses: None
+   Replies: None
 
-   Example: USER ADD : guestuser guestpassword
+   Example: "USER ADD : guestuser guestpassword"
+
+2.4.10.  USER REMOVE
+
+   Query: USER REMOVE
+
+   Parameters: "<username>"
+
+   Replies: None
+
+   Example: "USER REMOVE guestuser"
+
 
 
 
@@ -338,54 +338,54 @@ Poulet                  Expires February 12, 2018               [Page 6]
 Internet-Draft                     I-D                       August 2017
 
 
-2.4.10.  USER REMOVE
-
-   Command: USER REMOVE
-
-   Parameters: <username>
-
-   Responses: None
-
-   Example: USER REMOVE guestuser
-
 2.4.11.  USER ADD GROUP
 
-   Command: USER ADD GROUP
+   Query: USER ADD GROUP
 
-   Parameters: <username> <group>
+   Parameters: "<username> <group>"
 
-   Responses: None
+   Replies: None
 
-   Example: USER ADD GROUP : guestuser guest
+   Example: "USER ADD GROUP : guestuser guest"
 
 2.4.12.  USER REMOVE GROUP
 
-   Command: USER REMOVE GROUP
+   Query: USER REMOVE GROUP
 
-   Parameters: <username> <group>
+   Parameters: "<username> <group>"
 
-   Responses: None
+   Replies: None
 
-   Example: USER REMOVE GROUP : guestuser guest
+   Example: "USER REMOVE GROUP : guestuser guest"
 
 2.4.13.  USER LIST GROUP
 
-   Command: USER LIST GROUP
+   Query: USER LIST GROUP
 
-   Parameters: <username>
+   Parameters: "<username>"
 
-   Responses: an array of groups, quoted
+   Replies: an array of groups, quoted "success ["root", "admin"]"
 
-   success ["root", "admin"]
-
-   Example: USER LIST GROUP : guestuser
+   Example: "USER LIST GROUP : guestuser"
 
 2.4.14.  USER CHANGE PASSWORD
 
-   Command: USER CHANGE PASSWORD
+   Query: USER CHANGE PASSWORD
 
-   Parameters: <username> <newpassword>
+   Parameters: "<username> <newpassword>"
 
+   Replies: None
+
+   Example: "USER CHANGE PASSWORD : guest newguestpassword"
+
+3.  Permissions
+
+   Any connected user can send queries to the server, which MUST respond
+   with "success" or "failure".  It might be a "failure" because the
+   user might not have the correct rights on the server.
+
+   When the server receive a query from a connected user, it MUST verify
+   if the user has access to this query.
 
 
 
@@ -394,23 +394,10 @@ Poulet                  Expires February 12, 2018               [Page 7]
 Internet-Draft                     I-D                       August 2017
 
 
-   Responses: None
-
-   Example: USER CHANGE PASSWORD : guest newguestpassword
-
-3.  Permissions
-
-   Any connected user can send commands to the server, which MUST
-   respond with "success" or "failure".  It might be a "failure" because
-   the user might not have the correct rights on the server.
-
-   When the server receive a command from a connected user, it MUST
-   verify if the user has access to this command.
-
    We RECOMMEND to manage the permissions by verifying that the user has
-   access to the resource equal to the command with "write".  Thus the
+   access to the resource equal to the query with "write".  Thus the
    server whould execute a operation very similar to "USER AS ACCESS TO
-   : connected_user_name COMMAND".
+   : connected_user_name QUERY".
 
 4.  References
 
@@ -433,6 +420,19 @@ Author's Address
    University of Kent
 
    Email: agp8@kent.ac.uk
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
