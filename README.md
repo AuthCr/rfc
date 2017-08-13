@@ -11,3 +11,7 @@
     yaourt -S --noconfirm xml2rfc
     apt-get install xml2rfc
     # ...
+
+## Generate the RFC
+
+    make
