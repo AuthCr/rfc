@@ -13,10 +13,9 @@ Expires: February 12, 2018
 
 Abstract
 
-   This standard aims to create a secure and simple user authentication
-   process and verification of her permissions on the resources of an
-   organization.  It is similar to the LDAP in this context, but much
-   simplier.
+   This standard aims to create a modern, secure and simple user
+   authentication, management, and verification of her permissions on
+   arbitrary resources in an organisation.
 
 Status of This Memo
 
@@ -53,6 +52,7 @@ Copyright Notice
 
 
 
+
 Poulet                  Expires February 12, 2018               [Page 1]
 
 Internet-Draft                     I-D                       August 2017
@@ -82,17 +82,19 @@ Internet-Draft                     I-D                       August 2017
 
 1.2.  Goals
 
-   In lots of projects it is required to have a authentication system,
-   in order to authorize users to do some actions, and identify them for
-   logging purposes.  This is a critical security issue because an error
-   in it cost money, trust, and privacy.  Furthermore, it is very
-   interesting for some parties to have a centralized authentication
-   system shared for several services.
+   Nowadays, it is very common to require an authentication system to
+   develop a software.  It allows the software to identify users,
+   authorize them to do some actions, and log it.  It is a critical
+   security issue because any error in the authentication policy or
+   implementation costs money, trust, and privacy.  Furthermore, it is
+   very interesting for some parties to have a centralized
+   authentication system shared for several services.
 
    The goal of the Auth service is to provide a clear, secure, and
-   simple authentication interface and authorization manager.  It is a
-   TCP server that SHOULD provide a SSL connection, on which an user
-   must be able to authenticate, and request access to a resource.
+   simple authentication interface and authorization manager.  It is
+   implemented with a TCP server that SHOULD provide a SSL connection,
+   on which a user must be able to authenticate, and request access to a
+   resource.
 
    The Auth service does not intend to replace security check on the
    services that use it.  It is an annular similar to the LDAP services,
@@ -103,8 +105,6 @@ Internet-Draft                     I-D                       August 2017
    The Auth service provides two mains features: The authentication of
    user and the permissions management of the resources, based on the
    access of a user.
-
-
 
 
 
@@ -126,24 +126,23 @@ Internet-Draft                     I-D                       August 2017
 
    Queries MUST follow the grammar defined bellow:
 
-SEP          = ":"
-WORD_FIRST   = <any alphanumeric ASCII character>
-WORD_ANY     = WORD_FIRST / <ASCII US, unit separator, underscore> / "-"
-WORD         = WORD_FIRST WORD_ANY *
-ANY          = <any unicode character>
-ANY_STR      = ANY ANY *
-SPACE        = <ASCII SP, space>
+   WORD_ANY     = <any alphanumeric ASCII character> / "_" / "-"
+   WORD         = WORD_ANY WORD_ANY *
+   ANY          = <any unicode character>
+   ANY_STR      = ANY ANY *
+   SPACE        = <ASCII SP, space>
 
-PARAMETERS   = ( WORD SPACE ) * ( ANY_STR ) ?
-QUERY_WORDS  = WORD SPACE ( WORD SPACE ) *
-QUERY        = QUERY_WORDS ( SEP PARAMETERS ) ?
+   OPTION       = WORD "=" WORD
+   PARAMETERS   = ( WORD SPACE ) * ( ANY_STR ) ?
+   QUERY_WORDS  = ( OPTION ) * WORD SPACE ( WORD SPACE / OPTION ) *
+   QUERY        = QUERY_WORDS ( ":" PARAMETERS ) ?
 
-JSON         = <Json object, defined in RFC7159> / "\"" ANY_STR "\""
-SUCCESS      = "success"
-FAILURE      = "failure"
-SUCCESS_DATA = ( SPACE JSON ) ?
-FAILURE_DATA = ( SPACE ANY * ) ?
-REPLY        = ( SUCCESS SUCCESS_DATA / FAILURE FAILURE_DATA )
+   JSON         = <Json object, defined in RFC7159> / "\"" ANY_STR "\""
+   SUCCESS      = "success"
+   FAILURE      = "failure"
+   SUCCESS_DATA = ( SPACE JSON ) ?
+   FAILURE_DATA = ( SPACE ANY * ) ?
+   REPLY        = ( SUCCESS SUCCESS_DATA / FAILURE FAILURE_DATA )
 
 2.1.1.  Special characters
 
@@ -161,7 +160,8 @@ REPLY        = ( SUCCESS SUCCESS_DATA / FAILURE FAILURE_DATA )
       authenticated user when matching queries.  Example: "/public/~/\*"
       for the user "root" is equal to "/public/root/\*".
 
-
+   o  "\a": it SHOULD be replaced with the username of the current
+      authenticated user when writing the query.
 
 
 
@@ -169,9 +169,6 @@ Poulet                  Expires February 12, 2018               [Page 3]
 
 Internet-Draft                     I-D                       August 2017
 
-
-   o  "\a": it SHOULD be replaced with the username of the current
-      authenticated user when writing the query.
 
 2.2.  Types of queries
 
@@ -219,14 +216,15 @@ Internet-Draft                     I-D                       August 2017
 
    Parameters: "<username> <password>"
 
+   Replies: Boolean
+
+
 
 
 Poulet                  Expires February 12, 2018               [Page 4]
 
 Internet-Draft                     I-D                       August 2017
 
-
-   Replies: Boolean
 
    Example: "AUTH : root toor"
 
@@ -274,6 +272,8 @@ Internet-Draft                     I-D                       August 2017
 
    Parameters: "<group>"
 
+   Replies: an associated array of resources and rights "success
+   {"/private" => "write", "/public" => "read"}"
 
 
 
@@ -281,9 +281,6 @@ Poulet                  Expires February 12, 2018               [Page 5]
 
 Internet-Draft                     I-D                       August 2017
 
-
-   Replies: an associated array of resources and rights "success
-   {"/private" => "write", "/public" => "read"}"
 
    Example: "GROUP LIST PERMS : guest"
 
@@ -327,8 +324,11 @@ Internet-Draft                     I-D                       August 2017
 
    Example: "USER REMOVE guestuser"
 
+2.4.11.  USER ADD GROUP
 
+   Query: USER ADD GROUP
 
+   Parameters: "<username> <group>"
 
 
 
@@ -337,12 +337,6 @@ Poulet                  Expires February 12, 2018               [Page 6]
 
 Internet-Draft                     I-D                       August 2017
 
-
-2.4.11.  USER ADD GROUP
-
-   Query: USER ADD GROUP
-
-   Parameters: "<username> <group>"
 
    Replies: None
 
@@ -387,17 +381,18 @@ Internet-Draft                     I-D                       August 2017
    When the server receive a query from a connected user, it MUST verify
    if the user has access to this query.
 
+   We RECOMMEND to manage the permissions by verifying that the user has
+   access to the resource equal to the query with "write".  Thus the
+   server whould execute a operation very similar to "USER AS ACCESS TO
+   : connected_user_name QUERY".
+
+
 
 
 Poulet                  Expires February 12, 2018               [Page 7]
 
 Internet-Draft                     I-D                       August 2017
 
-
-   We RECOMMEND to manage the permissions by verifying that the user has
-   access to the resource equal to the query with "write".  Thus the
-   server whould execute a operation very similar to "USER AS ACCESS TO
-   : connected_user_name QUERY".
 
 4.  References
 
@@ -420,6 +415,11 @@ Author's Address
    University of Kent
 
    Email: agp8@kent.ac.uk
+
+
+
+
+
 
 
 
