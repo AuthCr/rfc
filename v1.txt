@@ -170,6 +170,41 @@ Poulet                  Expires February 12, 2018               [Page 3]
 Internet-Draft                     I-D                       August 2017
 
 
+2.1.2.  Options
+
+   Some operations can be parametrized via OPTIONS.  Options are defined
+   by a couple KEY=VALUE.
+
+2.1.2.1.  COUNT
+
+   The option "COUNT" defines an amount of data to retreive.  The value
+   of this option is a unsigned 64 bits number.
+
+   o  Minimum: 0
+
+   o  Maximum: 18446744073709551615
+
+   o  Default: 100
+
+   Example: "USER LIST COUNT=1" to retreive one user maximum.
+
+2.1.2.2.  PAGE
+
+   The option "PAGE" defines an offset of data.  It is multiplicated
+   with the option "COUNT" to find the first data to retreive.  The
+   value of this operation is a unsigned 64 bits number.
+
+   o  Minimum: 0
+
+   o  Maximum: 18446744073709551615
+
+   o  Default: 0
+
+   Example: "USER LIST PAGE=2 COUNT=10" to retreive maximum 10 users,
+   beginning from the 21th.
+
+2.1.3.  Query
+
 2.2.  Types of queries
 
    There are 3 mains types of query: AUTH, USER, GROUP.  They begin with
@@ -182,6 +217,14 @@ Internet-Draft                     I-D                       August 2017
 
    If the query fails, a string that describes the problem MAY also be
    added.  There is 3 reasons of failures:
+
+
+
+
+Poulet                  Expires February 12, 2018               [Page 4]
+
+Internet-Draft                     I-D                       August 2017
+
 
    1.  The client is not connected (no AUTH query has been successful)
 
@@ -218,14 +261,6 @@ Internet-Draft                     I-D                       August 2017
 
    Replies: Boolean
 
-
-
-
-Poulet                  Expires February 12, 2018               [Page 4]
-
-Internet-Draft                     I-D                       August 2017
-
-
    Example: "AUTH : root toor"
 
 2.4.2.  USER HAS ACCESS TO
@@ -237,6 +272,15 @@ Internet-Draft                     I-D                       August 2017
    Replies: Boolean
 
    Example: "USER HAS ACCESS TO : root write https://url/some/path"
+
+
+
+
+
+Poulet                  Expires February 12, 2018               [Page 5]
+
+Internet-Draft                     I-D                       August 2017
+
 
 2.4.3.  GROUP ADD
 
@@ -275,13 +319,6 @@ Internet-Draft                     I-D                       August 2017
    Replies: an associated array of resources and rights "success
    {"/private" => "write", "/public" => "read"}"
 
-
-
-Poulet                  Expires February 12, 2018               [Page 5]
-
-Internet-Draft                     I-D                       August 2017
-
-
    Example: "GROUP LIST PERMS : guest"
 
 2.4.7.  GROUP GET PERM
@@ -293,6 +330,13 @@ Internet-Draft                     I-D                       August 2017
    Reply: a right (permission value) quoted "success "write""
 
    Example: "GROUP GET PERM : guest /public/some"
+
+
+
+Poulet                  Expires February 12, 2018               [Page 6]
+
+Internet-Draft                     I-D                       August 2017
+
 
    Example: "GROUP GET PERM : guest /private/some"
 
@@ -330,14 +374,6 @@ Internet-Draft                     I-D                       August 2017
 
    Parameters: "<username> <group>"
 
-
-
-
-Poulet                  Expires February 12, 2018               [Page 6]
-
-Internet-Draft                     I-D                       August 2017
-
-
    Replies: None
 
    Example: "USER ADD GROUP : guestuser guest"
@@ -349,6 +385,14 @@ Internet-Draft                     I-D                       August 2017
    Parameters: "<username> <group>"
 
    Replies: None
+
+
+
+
+Poulet                  Expires February 12, 2018               [Page 7]
+
+Internet-Draft                     I-D                       August 2017
+
 
    Example: "USER REMOVE GROUP : guestuser guest"
 
@@ -386,14 +430,6 @@ Internet-Draft                     I-D                       August 2017
    server whould execute a operation very similar to "USER AS ACCESS TO
    : connected_user_name QUERY".
 
-
-
-
-Poulet                  Expires February 12, 2018               [Page 7]
-
-Internet-Draft                     I-D                       August 2017
-
-
 4.  References
 
 4.1.  Normative References
@@ -402,6 +438,17 @@ Internet-Draft                     I-D                       August 2017
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <http://www.rfc-editor.org/info/rfc2119>.
+
+
+
+
+
+
+
+Poulet                  Expires February 12, 2018               [Page 8]
+
+Internet-Draft                     I-D                       August 2017
+
 
 4.2.  Informative References
 
@@ -445,4 +492,13 @@ Author's Address
 
 
 
-Poulet                  Expires February 12, 2018               [Page 8]
+
+
+
+
+
+
+
+
+
+Poulet                  Expires February 12, 2018               [Page 9]
