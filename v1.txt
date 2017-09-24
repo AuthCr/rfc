@@ -396,15 +396,15 @@ Internet-Draft                     I-D                       August 2017
 
    Example: "USER REMOVE GROUP : guestuser guest"
 
-2.4.13.  USER LIST GROUP
+2.4.13.  USER LIST GROUPS
 
-   Query: USER LIST GROUP
+   Query: USER LIST GROUPS
 
    Parameters: "<username>"
 
    Replies: an array of groups, quoted "success ["root", "admin"]"
 
-   Example: "USER LIST GROUP : guestuser"
+   Example: "USER LIST GROUPS : guestuser"
 
 2.4.14.  USER CHANGE PASSWORD
 
