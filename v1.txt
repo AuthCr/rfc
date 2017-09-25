@@ -4,8 +4,8 @@
 
 Network Working Group                                          A. Poulet
 Internet-Draft                                        University of Kent
-Intended status: Informational                           August 11, 2017
-Expires: February 12, 2018
+Intended status: Informational                        September 25, 2017
+Expires: March 29, 2018
 
 
                     Authentication service over TCP
@@ -32,7 +32,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on February 12, 2018.
+   This Internet-Draft will expire on March 29, 2018.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Poulet                  Expires February 12, 2018               [Page 1]
+Poulet                   Expires March 29, 2018                 [Page 1]
 
-Internet-Draft                     I-D                       August 2017
+Internet-Draft                     I-D                    September 2017
 
 
 1.  Introduction
@@ -109,9 +109,9 @@ Internet-Draft                     I-D                       August 2017
 
 
 
-Poulet                  Expires February 12, 2018               [Page 2]
+Poulet                   Expires March 29, 2018                 [Page 2]
 
-Internet-Draft                     I-D                       August 2017
+Internet-Draft                     I-D                    September 2017
 
 
 1.4.  Users and permissions
@@ -165,15 +165,15 @@ Internet-Draft                     I-D                       August 2017
 
 
 
-Poulet                  Expires February 12, 2018               [Page 3]
+Poulet                   Expires March 29, 2018                 [Page 3]
 
-Internet-Draft                     I-D                       August 2017
+Internet-Draft                     I-D                    September 2017
 
 
 2.1.2.  Options
 
    Some operations can be parametrized via OPTIONS.  Options are defined
-   by a couple KEY=VALUE.
+   by a couple "KEY=VALUE".
 
 2.1.2.1.  COUNT
 
@@ -203,46 +203,28 @@ Internet-Draft                     I-D                       August 2017
    Example: "USER LIST PAGE=2 COUNT=10" to retreive maximum 10 users,
    beginning from the 21th.
 
-2.1.3.  Query
+2.2.  Queries
 
-2.2.  Types of queries
+2.2.1.  Type of queries
 
    There are 3 mains types of query: AUTH, USER, GROUP.  They begin with
    the associated word.  Other queries MAY be added to extend the
    language but they MUST NOT begin with AUTH, USER, or GROUP.
 
-2.3.  Reply data
+2.2.2.  Replies
 
-2.3.1.  Failures
+   The replies contain the word "success" or "failure", and MAY be
+   followed by a json data.
 
-   If the query fails, a string that describes the problem MAY also be
-   added.  There is 3 reasons of failures:
-
-
+   There are 3 types replies possible:
 
 
-Poulet                  Expires February 12, 2018               [Page 4]
+
+
+Poulet                   Expires March 29, 2018                 [Page 4]
 
-Internet-Draft                     I-D                       August 2017
+Internet-Draft                     I-D                    September 2017
 
-
-   1.  The client is not connected (no AUTH query has been successful)
-
-   2.  The query contains an error (missing : for example)
-
-   3.  The query returns a boolean "success" or "failure"
-
-2.3.2.  Success
-
-   If the query returns a success, it is sometimes followed by a Json
-   object, for the read operations (such as USER LIST, etc.).
-
-2.4.  Queries descriptions
-
-   In the replies, we only handle success data and boolean replies.
-   Failure MAY occurs in any reply for the same reasons.
-
-   There are 3 replies possible:
 
    1.  Boolean: either "success" or "failure".  A failure MAY not be an
        error of syntax or connection.
@@ -253,7 +235,29 @@ Internet-Draft                     I-D                       August 2017
    3.  Specified: other replies MAY be a failure (like None) but the
        "success" reply is followed by more data.
 
-2.4.1.  AUTH
+2.2.3.  Failure
+
+   If the query fails, a string that describes the problem MAY also be
+   added.  There are 3 reasons of failures:
+
+   1.  The client is not connected (no AUTH query has been successful).
+
+   2.  The query contains an error (missing ":" for example).
+
+   3.  The client does not have the right permissions to execute the
+       query.
+
+2.2.4.  Success
+
+   If the query returns a success, it is sometimes followed by a Json
+   object, for the read operations (such as USER LIST, etc.).
+
+2.2.5.  Queries descriptions
+
+   Parameters CAN be optional or mandatory.  Optional parameters are
+   written "<param>".  Mandatory parameters are written "[param]".
+
+2.2.5.1.  AUTH
 
    Query: "AUTH"
 
@@ -263,7 +267,7 @@ Internet-Draft                     I-D                       August 2017
 
    Example: "AUTH : root toor"
 
-2.4.2.  USER HAS ACCESS TO
+2.2.5.2.  USER HAS ACCESS TO
 
    Query: USER HAS ACCESS TO
 
@@ -271,38 +275,47 @@ Internet-Draft                     I-D                       August 2017
 
    Replies: Boolean
 
+
+
+Poulet                   Expires March 29, 2018                 [Page 5]
+
+Internet-Draft                     I-D                    September 2017
+
+
    Example: "USER HAS ACCESS TO : root write https://url/some/path"
 
-
-
-
-
-Poulet                  Expires February 12, 2018               [Page 5]
-
-Internet-Draft                     I-D                       August 2017
-
-
-2.4.3.  GROUP ADD
+2.2.5.3.  GROUP ADD
 
    Query: "GROUP ADD"
 
-   Parameters: "<group> <perm> <resource>"
+   Parameters: "<group> [perm] [resource]"
 
    Replies: None
+
+   Description: Create a group, and/or add the resource to an existing
+   group.
+
+   Example: "GROUP ADD : guest"
 
    Example: "GROUP ADD : guest read /public*"
 
-2.4.4.  GROUP REMOVE
+2.2.5.4.  GROUP REMOVE
 
    Query: "GROUP REMOVE"
 
-   Parameters: "<group>"
+   Parameters: "<group> [resource]"
 
    Replies: None
 
+   Description: It MUST delete all permissions of a group on a given
+   resource or the one specified.  A group with no permissions SHOULD
+   NOT exist (nor any relation with such group).
+
    Example: "GROUP REMOVE : guest"
 
-2.4.5.  GROUP LIST
+   Example: "GROUP REMOVE : guest *"
+
+2.2.5.5.  GROUP LIST
 
    Query: "GROUP LIST"
 
@@ -310,18 +323,27 @@ Internet-Draft                     I-D                       August 2017
 
    Example: `GROUP LIST
 
-2.4.6.  GROUP LIST PERMS
+2.2.5.6.  GROUP LIST PERMS
 
    Query: "GROUP LIST PERMS"
 
    Parameters: "<group>"
+
+
+
+
+
+Poulet                   Expires March 29, 2018                 [Page 6]
+
+Internet-Draft                     I-D                    September 2017
+
 
    Replies: an associated array of resources and rights "success
    {"/private" => "write", "/public" => "read"}"
 
    Example: "GROUP LIST PERMS : guest"
 
-2.4.7.  GROUP GET PERM
+2.2.5.7.  GROUP GET PERM
 
    Query: GROUP GET PERM
 
@@ -331,16 +353,9 @@ Internet-Draft                     I-D                       August 2017
 
    Example: "GROUP GET PERM : guest /public/some"
 
-
-
-Poulet                  Expires February 12, 2018               [Page 6]
-
-Internet-Draft                     I-D                       August 2017
-
-
    Example: "GROUP GET PERM : guest /private/some"
 
-2.4.8.  USER LIST
+2.2.5.8.  USER LIST
 
    Query: USER LIST
 
@@ -348,7 +363,7 @@ Internet-Draft                     I-D                       August 2017
 
    Example: "USER LIST"
 
-2.4.9.  USER ADD
+2.2.5.9.  USER ADD
 
    Query: USER ADD
 
@@ -358,7 +373,7 @@ Internet-Draft                     I-D                       August 2017
 
    Example: "USER ADD : guestuser guestpassword"
 
-2.4.10.  USER REMOVE
+2.2.5.10.  USER REMOVE
 
    Query: USER REMOVE
 
@@ -368,7 +383,18 @@ Internet-Draft                     I-D                       August 2017
 
    Example: "USER REMOVE guestuser"
 
-2.4.11.  USER ADD GROUP
+
+
+
+
+
+
+Poulet                   Expires March 29, 2018                 [Page 7]
+
+Internet-Draft                     I-D                    September 2017
+
+
+2.2.5.11.  USER ADD GROUP
 
    Query: USER ADD GROUP
 
@@ -378,7 +404,7 @@ Internet-Draft                     I-D                       August 2017
 
    Example: "USER ADD GROUP : guestuser guest"
 
-2.4.12.  USER REMOVE GROUP
+2.2.5.12.  USER REMOVE GROUP
 
    Query: USER REMOVE GROUP
 
@@ -386,17 +412,9 @@ Internet-Draft                     I-D                       August 2017
 
    Replies: None
 
-
-
-
-Poulet                  Expires February 12, 2018               [Page 7]
-
-Internet-Draft                     I-D                       August 2017
-
-
    Example: "USER REMOVE GROUP : guestuser guest"
 
-2.4.13.  USER LIST GROUPS
+2.2.5.13.  USER LIST GROUPS
 
    Query: USER LIST GROUPS
 
@@ -406,7 +424,7 @@ Internet-Draft                     I-D                       August 2017
 
    Example: "USER LIST GROUPS : guestuser"
 
-2.4.14.  USER CHANGE PASSWORD
+2.2.5.14.  USER CHANGE PASSWORD
 
    Query: USER CHANGE PASSWORD
 
@@ -425,6 +443,13 @@ Internet-Draft                     I-D                       August 2017
    When the server receive a query from a connected user, it MUST verify
    if the user has access to this query.
 
+
+
+Poulet                   Expires March 29, 2018                 [Page 8]
+
+Internet-Draft                     I-D                    September 2017
+
+
    We RECOMMEND to manage the permissions by verifying that the user has
    access to the resource equal to the query with "write".  Thus the
    server whould execute a operation very similar to "USER AS ACCESS TO
@@ -438,17 +463,6 @@ Internet-Draft                     I-D                       August 2017
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <http://www.rfc-editor.org/info/rfc2119>.
-
-
-
-
-
-
-
-Poulet                  Expires February 12, 2018               [Page 8]
-
-Internet-Draft                     I-D                       August 2017
-
 
 4.2.  Informative References
 
@@ -487,18 +501,4 @@ Author's Address
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Poulet                  Expires February 12, 2018               [Page 9]
+Poulet                   Expires March 29, 2018                 [Page 9]
