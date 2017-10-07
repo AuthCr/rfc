@@ -258,10 +258,10 @@ Internet-Draft                     I-D                    September 2017
 
 2.3.1.  Type of queries
 
-   There are 3 types of query defined in this standard: AUTH, USER,
-   GROUP.  They begin with the associated word.  Other queries MAY be
-   added to extend the language but they MUST NOT begin with AUTH, USER,
-   or GROUP (they are reserved).
+   There are 3 types of query defined in this standard: _AUTH_, _USER_,
+   _GROUP_.  They begin with the associated word.  Other queries MAY be
+   added to extend the language but they MUST NOT begin with _AUTH_,
+   _USER_, or _GROUP_ (they are reserved).
 
 2.3.2.  Replies
 
@@ -293,7 +293,8 @@ Internet-Draft                     I-D                    September 2017
    If the query fails, a string that describes the problem MAY also be
    added.  There are 3 reasons of failures:
 
-   1.  The client is not connected (no AUTH query has been successful).
+   1.  The client is not connected (no previous AUTH query has been
+       successful or the user has been disconnected for some reasons).
 
    2.  The query contains an error (missing ":" for example).
 
@@ -329,7 +330,6 @@ Internet-Draft                     I-D                    September 2017
    Replies: Boolean
 
    Example: "USER HAS ACCESS TO : root write https://url/some/path"
-
 
 
 
@@ -514,16 +514,23 @@ Internet-Draft                     I-D                    September 2017
    server whould execute a operation very similar to "USER AS ACCESS TO
    : connected_user_name QUERY".
 
-4.  References
+4.  Logs
 
-4.1.  Normative References
+   For security reasons, any query/reply status SHOULD BE logged by the
+   *server*.  The format of the logs is not defined in this RFC.  A text
+   version of the logs SHOULD BE provided.  A binary version of the logs
+   COULD be provided.
+
+5.  References
+
+5.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997, <https://www.rfc-
               editor.org/info/rfc2119>.
 
-4.2.  Informative References
+5.2.  Informative References
 
    [RFC7159]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
               Interchange Format", RFC 7159, DOI 10.17487/RFC7159, March
@@ -535,13 +542,6 @@ Author's Address
    University of Kent
 
    Email: agp8@kent.ac.uk
-
-
-
-
-
-
-
 
 
 
